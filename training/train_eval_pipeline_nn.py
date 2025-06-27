@@ -25,7 +25,7 @@ EPOCHS = 2
 LR = 1e-2
 WEIGHT_DECAY = 1e-5
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-NN_MODEL = CustomResNet50() # CustomViT()# 
+NN_MODEL = CustomResNet50().to(DEVICE) # CustomViT()# 
 print('Total trainable parameters', NN_MODEL.count_total_parameters())
 # Optimizer
 optimizer = torch.optim.AdamW(NN_MODEL.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
@@ -83,6 +83,5 @@ print(results_df)
 prefix = f'{NN_MODEL.__class__.__name__}_lr{LR}_wd{WEIGHT_DECAY}_bs{BATCH_SIZE}_epochs{EPOCHS}'
 results_df.to_csv(f"./training/results/test_results_{prefix}.csv", index=False)
 conf_matrix_df.to_csv(f"./training/results/confusion_matrix_{prefix}.csv", index=False)
-print("Results saved to test_results.csv and confusion_matrix.csv")
 
 save_confusion_matrix_plot(conf, f'./training/figures/confusion_matrix_{prefix}.png')
