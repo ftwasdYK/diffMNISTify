@@ -12,23 +12,6 @@ from sklearn.model_selection import GridSearchCV,StratifiedKFold
 from utils import load_precomputed_features, save_confusion_matrix_sklearn
 from ml_models import RandomForest, RidgeClassifierModel, SupportVectorMachine
 
-# print(y.shape)
-# y_pred_test = pipeline.predict(x)
-
-# cm = confusion_matrix(y, y_pred_test)
-# disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-# disp.plot()
-# model_class_name = type(MODEL).__name__ 
-# plt.savefig(f'./results/{model_class_name}_confusion_matrix.png')
-# plt.show()
-
-# report_test = classification_report(y, y_pred_test, output_dict=False)
-
-# print(report_test)
-# joblib.dump(pipeline, f'./models_pkl/{model_class_name}.pkl')
-#################################################################
-
-
 MODELS = [RandomForest(), RidgeClassifierModel(), SupportVectorMachine()]
 NORMALAZATION_TECHNIQUE = StandardScaler()
 NUM_SAMPLES_PER_CLASS = 4000
@@ -39,8 +22,8 @@ DIR_RESULTS = './training/'
 
 if __name__ == "__main__":
     
-    if not os.path.exists("training/results"):
-        os.makedirs("training/results")
+    if not os.path.exists("./training/results"):
+        os.makedirs("./training/results")
 
     x_train, y_train = load_precomputed_features(NUM_SAMPLES_PER_CLASS, LAYERS_EXPORT, subset='train')
     
