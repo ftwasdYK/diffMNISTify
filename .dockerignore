@@ -1,0 +1,16 @@
+__pycache__/
+.venv/
+data/
+*.pyc
+*.pyo
+*.pkl
+*.h5
+.vscode/
+.idea/
+.env
+.git
+*.log
+.gitignore
+README.md
+sample_response.json
+checkpoints/
