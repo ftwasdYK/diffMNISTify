@@ -5,10 +5,13 @@ from typing import Tuple
 import torch
 import seaborn as sns
 from torchvision import datasets
+import torchvision
 import torchmetrics
 import matplotlib.pyplot as plt
 from glob import glob
 from sklearn.metrics import ConfusionMatrixDisplay
+from PIL import Image
+import os
 
 class ChannelRepeat(nn.Module):
     def __init__(self):
@@ -188,3 +191,28 @@ def save_confusion_matrix_sklearn(cm, filename: str) -> None:
     disp.plot()
     plt.savefig(filename)
     plt.show()
+
+def get_data(args):
+    transforms_train = torchvision.transforms.Compose([
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Resize((32, 32)),
+        # ChannelRepeat(),
+        # torchvision.transforms.Normalize((0.5), (0.5))
+    ])
+    
+    dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transforms_train)
+    dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
+    return dataloader
+
+
+def setup_logging(run_name):
+    os.makedirs("./checkpoints", exist_ok=True)
+    os.makedirs("gen_training_results", exist_ok=True)
+    os.makedirs(os.path.join("./checkpoints", run_name), exist_ok=True)
+    os.makedirs(os.path.join("gen_training_results", run_name), exist_ok=True)
+
+def save_images(images, path, **kwargs):
+    grid = torchvision.utils.make_grid(images, **kwargs)
+    ndarr = grid.permute(1, 2, 0).to('cpu').numpy()
+    im = Image.fromarray(ndarr)
+    im.save(path)
