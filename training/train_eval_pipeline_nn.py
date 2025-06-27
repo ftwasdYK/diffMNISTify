@@ -13,6 +13,13 @@ import os
 
 print("Running from directory:", os.getcwd())
 
+if not os.path.exists("./training/results"):
+        os.makedirs("./training/results")
+
+if not os.path.exists("./training/figures"):
+        os.makedirs("./training/figures")
+
+
 BATCH_SIZE = 16
 EPOCHS = 2
 LR = 1e-2
@@ -59,10 +66,10 @@ nn_m = MultiClassificationTrainer(
     verbose=True
 )
 
-# hist, checkp_dir = nn_m.train_nn()
+hist, checkp_dir = nn_m.train_nn()
 
 # load the best model
-checkp_dir = '/home/jkr/projects/testfsapi/checkpoints/CustomResNet50/ckp_epoch_2.pth'
+# checkp_dir = './checkpoints/CustomResNet50/ckp_epoch_2.pth'
 nn_m.load_checkpoint(checkp_dir)
 
 ##### Evaluation Phase #####   
