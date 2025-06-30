@@ -92,14 +92,14 @@ class FeatureExtractor(BaseNN):
     
     def forward(self, x:torch.Tensor) -> torch.Tensor:
             with torch.no_grad():
-                return self.layers(x).flatten().numpy()
+                return self.layers(x).flatten()
             
 
 
 ################# Diffusion models #################
 
 
-from utils import get_data
+from training.utils import get_data
 
 def one_param(m):
     "get model first parameter"
