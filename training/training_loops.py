@@ -135,7 +135,7 @@ class MultiClassificationTrainer(BaseTrain):
     """
 
     def __init__(self, model, train_loader, val_loader, loss_fn, optimizer, epochs, device, checkpoint_dir = './checkpoints', patience=10, scheduler=None, verbose=False, gen_data=False):   
-        super().__init__(model, train_loader, val_loader, loss_fn, optimizer, epochs, device, checkpoint_dir, patience, scheduler, gen_data=False)
+        super().__init__(model, train_loader, val_loader, loss_fn, optimizer, epochs, device, checkpoint_dir, patience, scheduler, gen_data=gen_data)
         self.verbose = verbose
 
     def train_epoch(self):
