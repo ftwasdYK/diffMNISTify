@@ -58,7 +58,7 @@ class CustomViT(BaseNN):
             self.model = vit_b_16(weights=self.weights)
             for param in self.model.parameters():
                 param.requires_grad = False
-        self.model.heads = torch.nn.Linear(self.model.heads.in_features, num_classes)
+        self.model.heads = nn.Sequential(torch.nn.Linear(768, num_classes))
     
     def forward(self, x:torch.Tensor) -> torch.Tensor:
         return self.model(x)
@@ -229,7 +229,6 @@ class Up(nn.Module):
 class UNet(nn.Module):
     def __init__(self, c_in=3, c_out=3, time_dim=256, n_feat_init=64, remove_deep_conv=False):
         super().__init__()
-        print(time_dim, n_feat_init)
         self.time_dim = time_dim
         self.remove_deep_conv = remove_deep_conv
         self.inc = DoubleConv(c_in, n_feat_init)
@@ -310,4 +309,5 @@ class UNet_conditional(UNet):
             t += self.label_emb(y)
 
         return self.unet_forwad(x, t)
+    
 __all__ = [CustomResNet50, CustomViT, FeatureExtractor, UNet_conditional]
