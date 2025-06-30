@@ -30,6 +30,10 @@ To build the project (this may take a while), run:
 bash build_project.sh
 ```
 
+After running `build_project.sh`, the `checkpoints` directory will be created.
+
+Copy the pre-trained model weights to their corresponding subdirectories inside the `checkpoints` folder.
+
 To send a request to the model and get a prediction for a digit, run:
 
 ```python
