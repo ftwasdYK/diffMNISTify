@@ -14,8 +14,8 @@ from ml_models import RandomForest, RidgeClassifierModel, SupportVectorMachine
 
 MODELS = [RandomForest(), RidgeClassifierModel(), SupportVectorMachine()]
 NORMALAZATION_TECHNIQUE = StandardScaler()
-NUM_SAMPLES_PER_CLASS = 400
-NUM_TEST_SAMPLES_PER_CLASS = 1000
+NUM_SAMPLES_PER_CLASS = 500
+NUM_TEST_SAMPLES_PER_CLASS = 1500
 LAYERS_EXPORT = 9
 DIR_RESULTS = './training/'
     
@@ -24,6 +24,9 @@ if __name__ == "__main__":
     
     if not os.path.exists("./training/results"):
         os.makedirs("./training/results")
+    
+    if not os.path.exists("./models_pkl"):
+        os.makedirs("./models_pkl/")
 
     x_train, y_train = load_precomputed_features(NUM_SAMPLES_PER_CLASS, LAYERS_EXPORT, subset='train')
     
@@ -49,12 +52,11 @@ if __name__ == "__main__":
         y_pred_tr = grid_search.predict(x_train)
         report_train = classification_report(y_train, y_pred_tr)
 
-        del x_train, y_train
         x_test, y_test= load_precomputed_features(NUM_TEST_SAMPLES_PER_CLASS, LAYERS_EXPORT, subset='test')
 
         y_pred = grid_search.predict(x_test)
         report_test = classification_report(y_test, y_pred, output_dict=True)
-        report_df = pd.DataFrame(report_test) #.rename(columns={"0.0": "Class 0", "1.0": "Class 1"})
+        report_df = pd.DataFrame(report_test)
         
         dir_results = DIR_RESULTS + f'results/{MODEL.str_name}_nS{NUM_SAMPLES_PER_CLASS}_Classification_Report.csv'
         report_df.to_csv(dir_results)
