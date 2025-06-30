@@ -24,6 +24,27 @@ Finally, an API endpoint was implemented to allow the generation of a specified 
 
 # Get started
 
+To build the project (this may take a while), run:
+
+```bash
+bash build_project.sh
+```
+
+To send a request to the model and get a prediction for a digit, run:
+
+```python
+python example_request.py
+```
+
+To request a specific number of synthetic digit images from the server, use:
+```python
+python example_gen_request.py --num 7
+```
+
+The outputs will be saved in the `./diffMNISTify` directory:
+
+- `sample_response.json` – contains the prediction response from the model.
+- `img_gen_response.png` – contains the generated synthetic digit image.
 
 # Training 
 
