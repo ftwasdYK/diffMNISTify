@@ -82,8 +82,7 @@ def torch_train_val_split(
     return train_loader, val_loader, test_loader
 
 def choose_random_balanced_subset(y, n_samples=500):
-    unique_classes, counts = np.unique(y, return_counts=True)
-    # print(counts)
+    unique_classes, _ = np.unique(y, return_counts=True)
     selected_indices = []
     for cls in unique_classes:
         cls_indices = np.where(y == cls)[0]
