@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from glob import glob
 from sklearn.metrics import ConfusionMatrixDisplay
 from PIL import Image
+from glob import glob
 import os
 
 class ChannelRepeat(nn.Module):
@@ -92,7 +93,7 @@ def choose_random_balanced_subset(y, n_samples=500):
     return selected_indices
 
 
-def prepare_data(transform_tr, transform_infer, batch_size) -> Tuple[DataLoader, DataLoader, DataLoader]:
+def prepare_data(transform_tr, transform_infer, batch_size, gen_data=False) -> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Prepares the training, validation, and test data loaders.
     
@@ -102,14 +103,41 @@ def prepare_data(transform_tr, transform_infer, batch_size) -> Tuple[DataLoader,
     
     Returns:
         Tuple of DataLoader objects for training, validation, and test datasets.
-    """
-    dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform_tr)
+    """ 
+    if gen_data:
+        class GenImageDataset(torch.utils.data.Dataset):
+            def __init__(self, image_dir, transform=None):
+                self.image_paths = sorted(glob(image_dir))
+                self.transform = transform
+
+            def __len__(self):
+                return len(self.image_paths)
+
+            def __getitem__(self, idx):
+                img_path = self.image_paths[idx]
+                image = Image.open(img_path).convert('L')
+                # Extract label from filename, e.g., x1xxx.png -> 1
+                label = int(os.path.basename(img_path).split('x')[1][0])
+                if self.transform:
+                    image = self.transform(image)
+                return image, label
+
+        dataset = GenImageDataset('./data/gen_data/train/*.png', transform=transform_tr)
+
+        train_loader, val_loader, _ = torch_train_val_split(
+            dataset,
+            batch_train=batch_size,
+            batch_eval=batch_size
+        )
     
-    train_loader, val_loader, _ = torch_train_val_split(
-        dataset,
-        batch_train=batch_size,
-        batch_eval=batch_size
-    )       
+    else:
+        dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform_tr)
+        
+        train_loader, val_loader, _ = torch_train_val_split(
+            dataset,
+            batch_train=batch_size,
+            batch_eval=batch_size
+        )
 
     test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform_infer)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
@@ -207,9 +235,9 @@ def get_data(args):
 
 def setup_logging(run_name):
     os.makedirs("./checkpoints", exist_ok=True)
-    os.makedirs("gen_training_results", exist_ok=True)
+    os.makedirs("./training/gen_training_results", exist_ok=True)
     os.makedirs(os.path.join("./checkpoints", run_name), exist_ok=True)
-    os.makedirs(os.path.join("gen_training_results", run_name), exist_ok=True)
+    os.makedirs(os.path.join("./training/gen_training_results", run_name), exist_ok=True)
 
 def save_images(images, path, **kwargs):
     grid = torchvision.utils.make_grid(images, **kwargs)
