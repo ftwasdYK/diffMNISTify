@@ -38,7 +38,8 @@ class BaseTrain:
             device:str, 
             checkpoint_dir:str='./checkpoints', 
             patience=10, 
-            scheduler=None
+            scheduler=None,
+            gen_data=False
             ):
         
         self.model = model
@@ -54,6 +55,7 @@ class BaseTrain:
         if not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
         self.early_stop = EarlyStopping(patience=patience, mode='min')
+        self.gen = gen_data
 
     def train_epoch(self):
         pass
@@ -106,8 +108,10 @@ class BaseTrain:
             checkpoint_path = os.path.join(self.checkpoint_dir, f'{model_name}_{i}')
             i += 1
         os.makedirs(checkpoint_path)
-        checkpoint_path = os.path.join(checkpoint_path, f'ckp_epoch_{epoch}.pth')
-
+        
+        gen_dir = 'gen' if self.gen else '' 
+        checkpoint_path = os.path.join(checkpoint_path, f'ckp_epoch_{epoch}_{gen_dir}.pth')
+        
         torch.save({
             'epoch': epoch,
             'model_state_dict': self.model.state_dict(),
@@ -130,8 +134,8 @@ class MultiClassificationTrainer(BaseTrain):
     Classification Train Class
     """
 
-    def __init__(self, model, train_loader, val_loader, loss_fn, optimizer, epochs, device, checkpoint_dir = './checkpoints', patience=10, scheduler=None, verbose=False):   
-        super().__init__(model, train_loader, val_loader, loss_fn, optimizer, epochs, device, checkpoint_dir, patience, scheduler)
+    def __init__(self, model, train_loader, val_loader, loss_fn, optimizer, epochs, device, checkpoint_dir = './checkpoints', patience=10, scheduler=None, verbose=False, gen_data=False):   
+        super().__init__(model, train_loader, val_loader, loss_fn, optimizer, epochs, device, checkpoint_dir, patience, scheduler, gen_data=False)
         self.verbose = verbose
 
     def train_epoch(self):
