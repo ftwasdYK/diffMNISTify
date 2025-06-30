@@ -195,7 +195,6 @@ cython_debug/
 
 data/*
 training/runs/
-training/gen_training_results/
 checkpoints/
 models_pkl/
 sample_response.json
