@@ -14,8 +14,8 @@ from ml_models import RandomForest, RidgeClassifierModel, SupportVectorMachine
 
 MODELS = [RandomForest(), RidgeClassifierModel(), SupportVectorMachine()]
 NORMALAZATION_TECHNIQUE = StandardScaler()
-NUM_SAMPLES_PER_CLASS = 4000
-NUM_TEST_SAMPLES_PER_CLASS = 3000
+NUM_SAMPLES_PER_CLASS = 400
+NUM_TEST_SAMPLES_PER_CLASS = 1000
 LAYERS_EXPORT = 9
 DIR_RESULTS = './training/'
     
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     x_train, y_train = load_precomputed_features(NUM_SAMPLES_PER_CLASS, LAYERS_EXPORT, subset='train')
     
     for MODEL in MODELS:
-
+        print(f'At {MODEL}')
         # Define the pipeline
         pipeline = Pipeline([
             ('norm_tech', NORMALAZATION_TECHNIQUE),
