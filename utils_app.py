@@ -4,6 +4,9 @@ import numpy as np
 from training.utils import ChannelRepeat
 from typing import Union
 
+from training.models import UNet_conditional
+
+
 class pipeline_prediction:
     def __init__(self, model):
         self.model = model
@@ -54,3 +57,39 @@ class pipeline_prediction:
         with torch.no_grad():
             out = self.model(proc_img.unsqueeze(0))  # Add batch dimension
             return torch.argmax(out, dim=1).item()
+
+def calculate_params(beta_start=1e-4, beta_end=0.02, noise_steps=400):
+    beta = torch.linspace(beta_start, beta_end, noise_steps)
+    alpha = 1. - beta
+    alpha_hat = torch.cumprod(alpha, dim=0)
+    return alpha, alpha_hat, beta
+
+@torch.inference_mode()
+def sample_ddpm(labels:int, n:int=1, cfg_scale:float=3, noise_steps:int=400, beta_start=1e-4, beta_end=0.02):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    labels = torch.tensor(labels).long().to(device)
+    checkpoint = torch.load('./checkpoints/DDPM_conditional/ddpm.pth', map_location=torch.device(device))
+    model = UNet_conditional(num_classes=10).to(device)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.eval()
+    Alpha, Alpha_hat, Beta = calculate_params(beta_start, beta_end, noise_steps)
+    with torch.inference_mode():
+        x = torch.randn((n, 1, 32, 32)).to(device)
+        for i in reversed(range(1, noise_steps)):
+            t = (torch.ones(n) * i).long().to(device)
+            predicted_noise = model(x, t, labels)
+            if cfg_scale > 0:
+                uncond_predicted_noise = model(x, t, None)
+                predicted_noise = torch.lerp(uncond_predicted_noise, predicted_noise, cfg_scale)
+            
+            alpha = Alpha[t][:, None, None, None]
+            alpha_hat = Alpha_hat[t][:, None, None, None]
+            beta = Beta[t][:, None, None, None]
+            if i > 1:
+                noise = torch.randn_like(x)
+            else:
+                noise = torch.zeros_like(x)
+            x = 1 / torch.sqrt(alpha) * (x - ((1 - alpha) / (torch.sqrt(1 - alpha_hat))) * predicted_noise) + torch.sqrt(beta) * noise
+    x = (x.clamp(-1, 1) + 1) / 2
+    x = (x * 255).type(torch.uint8).squeeze()
+    return x
