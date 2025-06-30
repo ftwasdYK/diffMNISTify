@@ -16,6 +16,7 @@ logging.basicConfig(format="%(asctime)s - %(levelname)s: %(message)s", level=log
 class Diffusion:
     def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=0.02, img_size=256, device="cuda"):
         self.noise_steps = noise_steps
+
         self.beta_start = beta_start
         self.beta_end = beta_end
 
@@ -101,12 +102,17 @@ def train(args):
             labels = torch.arange(10).long().to(device)
             sampled_images = diffusion.sample(model, n=len(labels), labels=labels)
             ema_sampled_images = diffusion.sample(ema_model, n=len(labels), labels=labels)
-            # plot_images(sampled_images)
             save_images(sampled_images, os.path.join("./training/gen_training_results", args.run_name, f"{epoch}.jpg"))
             save_images(ema_sampled_images, os.path.join("./training/gen_training_results", args.run_name, f"{epoch}_ema.jpg"))
-            torch.save(model.state_dict(), os.path.join("./checkpoints", args.run_name, f"ckpt.pt"))
-            torch.save(ema_model.state_dict(), os.path.join("./checkpoints", args.run_name, f"ema_ckpt.pt"))
-            torch.save(optimizer.state_dict(), os.path.join("./checkpoints", args.run_name, f"optim.pt"))
+            checkpoint_path = os.path.join("./checkpoints", args.run_name, "ddpm.pth")
+            torch.save(
+                {
+                    'epoch': epoch,
+                    'model_state_dict': model.state_dict(),
+                    'ema_model_state_dict': ema_model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    }, 
+                    checkpoint_path)
 
 
 def main():
@@ -119,7 +125,7 @@ def main():
     args.noise_steps = 400
     args.num_classes = 10
     args.dataset_path = "./data/mnist"
-    args.device = "cuda:2"
+    args.device = "cuda" if torch.cuda.is_available() else "cpu"
     args.lr = 3e-4
     args.feat_init = 64
     args.time_dim = args.feat_init * 4 
